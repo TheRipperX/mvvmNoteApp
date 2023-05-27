@@ -2,4 +2,23 @@
     <string name="app_name">mvvm noteapp</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="mvvm_noteapp">Mvvm NoteApp</string>
+    <string name="save">Save</string>
+    <string name="low">Low</string>
+    <string name="normal">Normal</string>
+    <string name="high">High</string>
+    <string name="priority">Priority</string>
+    <string name="home">Home</string>
+    <string name="work">Work</string>
+    <string name="learning">Learning</string>
+    <string name="healthy">Healthy</string>
+    <string name="categorise">Categorise</string>
+    <string name="description">Descriptions</string>
+    <string name="title">Tilte</string>
+    <string name="search">Search</string>
+    <string name="filter">Filter</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="description_text_user">Description</string>
+    <string name="title_text_user">Tilte</string>
 </resources>
