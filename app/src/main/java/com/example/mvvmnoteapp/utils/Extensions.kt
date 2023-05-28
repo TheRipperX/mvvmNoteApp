@@ -18,6 +18,19 @@ fun Spinner.setItemsSpinner(list: MutableList<String>, itemBack: (String) -> Uni
         override fun onNothingSelected(p0: AdapterView<*>?) {
 
         }
+    }
+}
 
+
+
+data class DataStatus<out T>(val success: Status, val data:T? = null, val empty: Boolean) {
+    enum class Status{
+        SUCCESS
+    }
+
+    companion object {
+        fun<T> success(data: T?, empty: Boolean): DataStatus<T> {
+            return DataStatus(Status.SUCCESS, data, empty)
+        }
     }
 }

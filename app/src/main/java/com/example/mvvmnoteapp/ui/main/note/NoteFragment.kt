@@ -54,17 +54,21 @@ class NoteFragment : BottomSheetDialogFragment() {
     private fun main() {
 
         binding.apply {
+            //set list priority and category
+            viewModelFragment.setPriority()
+            viewModelFragment.setCategory()
 
             //set spinner category
-            val listCategory = mutableListOf(HEALTHY, HOME, WORK, LEARNING)
-            spinnerCategorise.setItemsSpinner(listCategory) {
-                categoryText = it
+            viewModelFragment.categoryList.observe(viewLifecycleOwner) {
+                spinnerCategorise.setItemsSpinner(it) {str->
+                    categoryText = str
+                }
             }
-
             //set spinner priority
-            val listPriority = mutableListOf(HIGH, NORMAL, LOW)
-            spinnerPriority.setItemsSpinner(listPriority) {
-                priorityText = it
+            viewModelFragment.priorityList.observe(viewLifecycleOwner) {
+                spinnerPriority.setItemsSpinner(it) {str->
+                    priorityText = str
+                }
             }
 
             //close fragments
@@ -90,7 +94,7 @@ class NoteFragment : BottomSheetDialogFragment() {
                 noteEntity.priority = priorityText
 
                 //save note
-                viewModelFragment.saveNote(noteEntity)
+                viewModelFragment.saveNote(true, noteEntity)
                 dismiss()
 
             }
