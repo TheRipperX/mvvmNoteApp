@@ -16,7 +16,7 @@
         app:title="@string/mvvm_noteapp"
         app:menu="@menu/menu_toolbar"
         app:titleCentered="true"
-        android:elevation="5dp"
+        android:elevation="3dp"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"/>
 
@@ -25,9 +25,6 @@
         android:id="@+id/list_main"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_margin="5dp"
-        android:elevation="5dp"
-        android:padding="5dp"
         android:clipToPadding="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
