@@ -1,22 +1,17 @@
 package com.example.mvvmnoteapp.ui.main.note
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.viewModels
-import com.example.mvvmnoteapp.R
+import androidx.lifecycle.LifecycleOwner
 import com.example.mvvmnoteapp.data.model.NoteEntity
 import com.example.mvvmnoteapp.databinding.FragmentNoteBinding
-import com.example.mvvmnoteapp.utils.HEALTHY
-import com.example.mvvmnoteapp.utils.HIGH
-import com.example.mvvmnoteapp.utils.HOME
-import com.example.mvvmnoteapp.utils.LEARNING
-import com.example.mvvmnoteapp.utils.LOW
-import com.example.mvvmnoteapp.utils.NORMAL
-import com.example.mvvmnoteapp.utils.WORK
+import com.example.mvvmnoteapp.utils.BUNDLE
+import com.example.mvvmnoteapp.utils.EDIT
+import com.example.mvvmnoteapp.utils.SAVE
 import com.example.mvvmnoteapp.utils.setItemsSpinner
 import com.example.mvvmnoteapp.viewmodel.ViewModelFragment
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -34,6 +29,13 @@ class NoteFragment : BottomSheetDialogFragment() {
     private var priorityText = ""
     //noteEntity id
     private var noteId = 0
+    // type edit or save note
+    private var type = ""
+    private var saveOrEdit = true
+
+    //set list to spinner
+    private val catList = mutableListOf<String>()
+    private val proList = mutableListOf<String>()
 
     @Inject
     lateinit var noteEntity: NoteEntity
@@ -52,6 +54,15 @@ class NoteFragment : BottomSheetDialogFragment() {
     }
 
     private fun main() {
+        noteId = arguments?.getInt(BUNDLE) ?: 0
+
+        saveOrEdit = if (noteId == 0) {
+            type = SAVE
+            true
+        }else {
+            type = EDIT
+            false
+        }
 
         binding.apply {
             //set list priority and category
@@ -60,12 +71,14 @@ class NoteFragment : BottomSheetDialogFragment() {
 
             //set spinner category
             viewModelFragment.categoryList.observe(viewLifecycleOwner) {
+                catList.addAll(it)
                 spinnerCategorise.setItemsSpinner(it) {str->
                     categoryText = str
                 }
             }
             //set spinner priority
             viewModelFragment.priorityList.observe(viewLifecycleOwner) {
+                proList.addAll(it)
                 spinnerPriority.setItemsSpinner(it) {str->
                     priorityText = str
                 }
@@ -73,6 +86,19 @@ class NoteFragment : BottomSheetDialogFragment() {
 
             //close fragments
             imgClose.setOnClickListener { dismiss() }
+            //set items note
+            if (type == EDIT) {
+                viewModelFragment.findIdNotes(noteId)
+
+                viewModelFragment.noteIds.observe(viewLifecycleOwner) {
+                    edtTitle.setText(it.title)
+                    edtDec.setText(it.desc)
+                    //set spinner
+                    spinnerCategorise.setSelection(getIndex(catList, it.category))
+                    spinnerPriority.setSelection(getIndex(proList, it.priority))
+                }
+            }
+
             //btn save
             btnSave.setOnClickListener {
                 val title = edtTitle.text.toString()
@@ -86,7 +112,6 @@ class NoteFragment : BottomSheetDialogFragment() {
                     ).show()
                     return@setOnClickListener
                 }
-
                 noteEntity.id = noteId
                 noteEntity.title = title
                 noteEntity.desc = desc
@@ -94,12 +119,23 @@ class NoteFragment : BottomSheetDialogFragment() {
                 noteEntity.priority = priorityText
 
                 //save note
-                viewModelFragment.saveNote(true, noteEntity)
+                viewModelFragment.saveOrEditNote(saveOrEdit, noteEntity)
                 dismiss()
 
             }
         }
 
+    }
+
+    private fun getIndex(list: MutableList<String>, item: String) : Int {
+        var index = 0
+        for (i in list.indices) {
+            if (list[i] == item) {
+                index = i
+                break
+            }
+        }
+        return index
     }
 
 }

@@ -1,5 +1,6 @@
 package com.example.mvvmnoteapp.viewmodel
 
+import android.provider.ContactsContract.CommonDataKinds.Note
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +15,7 @@ import com.example.mvvmnoteapp.utils.NORMAL
 import com.example.mvvmnoteapp.utils.WORK
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,6 +25,8 @@ class ViewModelFragment @Inject constructor(private val repositoryNoteFragments:
 
     val priorityList = MutableLiveData<MutableList<String>>()
     val categoryList = MutableLiveData<MutableList<String>>()
+
+    var noteIds = MutableLiveData<NoteEntity>()
 
     fun setPriority() = viewModelScope.launch(Dispatchers.IO) {
         val listPriority = mutableListOf(HIGH, NORMAL, LOW)
@@ -34,10 +38,17 @@ class ViewModelFragment @Inject constructor(private val repositoryNoteFragments:
         categoryList.postValue(listCategory)
     }
 
+    fun findIdNotes(id: Int) = viewModelScope.launch(Dispatchers.IO) {
+        repositoryNoteFragments.findIdNote(id).collect {
+            noteIds.postValue(it)
+        }
+    }
 
-    fun saveNote(isSave: Boolean, noteEntity: NoteEntity) = viewModelScope.launch(Dispatchers.IO) {
+    fun saveOrEditNote(isSave: Boolean, noteEntity: NoteEntity) = viewModelScope.launch(Dispatchers.IO) {
         if (isSave) {
             repositoryNoteFragments.saveNote(noteEntity)
+        }else {
+            repositoryNoteFragments.editNote(noteEntity)
         }
     }
 }

@@ -22,7 +22,7 @@ interface NoteDao {
     @Update
     suspend fun update(noteEntity: NoteEntity)
 
-    @Query("SELECT * FROM $NOTE_TABLE")
+    @Query("SELECT * FROM $NOTE_TABLE ORDER BY id DESC")
     fun getAllNote(): Flow<MutableList<NoteEntity>>
 
     @Query("SELECT * FROM $NOTE_TABLE WHERE id = :id")

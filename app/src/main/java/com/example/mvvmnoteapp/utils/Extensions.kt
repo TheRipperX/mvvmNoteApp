@@ -4,6 +4,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Spinner
+import androidx.recyclerview.widget.DiffUtil
 
 
 fun Spinner.setItemsSpinner(list: MutableList<String>, itemBack: (String) -> Unit) {
@@ -33,4 +34,24 @@ data class DataStatus<out T>(val success: Status, val data:T? = null, val empty:
             return DataStatus(Status.SUCCESS, data, empty)
         }
     }
+}
+
+
+class AdapterDiffer(private val olds: List<*>, private val news: List<*>): DiffUtil.Callback() {
+    override fun getOldListSize(): Int {
+        return olds.size
+    }
+
+    override fun getNewListSize(): Int {
+        return news.size
+    }
+
+    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+        return olds[oldItemPosition] == news[newItemPosition]
+    }
+
+    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+        return olds[oldItemPosition] == news[newItemPosition]
+    }
+
 }

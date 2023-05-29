@@ -2,18 +2,24 @@ package com.example.mvvmnoteapp.ui.main
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.provider.ContactsContract.CommonDataKinds.Note
-import android.util.Log
 import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import androidx.activity.viewModels
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
-import androidx.lifecycle.LifecycleOwner
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.example.mvvmnoteapp.R
 import com.example.mvvmnoteapp.data.model.NoteEntity
 import com.example.mvvmnoteapp.databinding.ActivityMainBinding
 import com.example.mvvmnoteapp.ui.main.note.NoteFragment
+import com.example.mvvmnoteapp.utils.ALL
+import com.example.mvvmnoteapp.utils.BUNDLE
+import com.example.mvvmnoteapp.utils.DELETE
+import com.example.mvvmnoteapp.utils.EDIT
+import com.example.mvvmnoteapp.utils.HIGH
+import com.example.mvvmnoteapp.utils.LOW
+import com.example.mvvmnoteapp.utils.NORMAL
 import com.example.mvvmnoteapp.viewmodel.ViewModelMain
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -22,6 +28,8 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+
+    private var itemAlertSelect = 0
 
     @Inject
     lateinit var noteEntity: NoteEntity
@@ -39,6 +47,39 @@ class MainActivity : AppCompatActivity() {
         main()
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId) {
+            R.id.menu_toolbar_filter -> {
+                openAlertDialogFilter()
+            }
+        }
+
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun openAlertDialogFilter() {
+
+        val listAlert = arrayOf(ALL, HIGH, NORMAL, LOW)
+
+        val alertDialog = AlertDialog.Builder(this)
+        alertDialog.setTitle("Filter Note...")
+        alertDialog.setSingleChoiceItems(listAlert, itemAlertSelect){dialog,which ->
+            itemAlertSelect = which
+
+            when(itemAlertSelect) {
+                0 -> {
+                    viewModelMain.getAllNotes()
+                }
+                in 1..listAlert.count() -> {
+                    viewModelMain.filterNote(listAlert[itemAlertSelect])
+                }
+            }
+            dialog.dismiss()
+        }
+        alertDialog.create()
+        alertDialog.show()
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
 
         menuInflater.inflate(R.menu.menu_toolbar, menu)
@@ -51,7 +92,9 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-
+                newText?.let {
+                    viewModelMain.searchNote(it)
+                }
                 return true
             }
 
@@ -69,18 +112,38 @@ class MainActivity : AppCompatActivity() {
             //click FloatingActionButton
             floatingBtn.setOnClickListener {
                 NoteFragment().show(supportFragmentManager, NoteFragment().tag)
+                itemAlertSelect = 0
             }
 
             //show all items main
             viewModelMain.getAllNotes()
             //set adapter main
             viewModelMain.notes.observe(this@MainActivity) {
-                //Log.d("TAG", "getAllNotes: $it")
                 isEmptyData(it.empty)
-                mainAdapter.differ.submitList(it.data)
+                mainAdapter.setData(it.data!!.toMutableList())
                 listMain.apply {
                     layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL)
                     adapter = mainAdapter
+                }
+            }
+
+            viewModelMain.noteEdit.observe(this@MainActivity) {
+                val bundle = Bundle()
+                bundle.putInt(BUNDLE, it)
+                val fragmentNote = NoteFragment()
+                fragmentNote.arguments = bundle
+                fragmentNote.show(supportFragmentManager, fragmentNote.tag)
+            }
+
+            //click adapter delete or edit
+            mainAdapter.getClick {note, s ->
+                when(s) {
+                    EDIT -> {
+                        viewModelMain.findNoteId(note.id)
+                    }
+                    DELETE -> {
+                        viewModelMain.deleteNote(note)
+                    }
                 }
             }
         }
